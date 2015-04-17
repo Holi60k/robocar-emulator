@@ -82,11 +82,11 @@ int main ( int argc, char* argv[] )
        team.assign ( "Norbi" );
      
      // If you use this sample you should add your copyright information here too:
-     /*
-     std::cout << "This SHM Client program has been modified by <Your Name>" << std::endl
+     
+     std::cout << "This SHM Client program has been modified by Nándor Holozsnyák" << std::endl
      << "Copyright (C) 2014, 2015 Norbert Bátfai" << std::endl
-     << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << std::endl
-     */
+     << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << std::endl;
+     
 
      // Do not remove this copyright notice!
      std::cout << "Robocar City Emulator and Robocar World Championship, Sample (My) SHM Client" << std::endl
@@ -99,8 +99,8 @@ int main ( int argc, char* argv[] )
 
      try {
           boost::asio::io_service io_service;
-          myShmClient.start10 ( io_service, port.c_str() );
-	  // myShmClient.start ( io_service, port.c_str() ); // 
+       //   myShmClient.start10 ( io_service, port.c_str() );
+	   myShmClient.start ( io_service, port.c_str() ); // 
      } catch ( std::exception& e ) {
           std::cerr << "Exception: " << e.what() << "\n";
      }

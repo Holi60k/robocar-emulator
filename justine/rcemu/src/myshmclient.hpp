@@ -516,12 +516,18 @@ private:
     unsigned from;
     unsigned to;
     int step;
+    int neargang;
   };
+  struct CopCarH
+  {
+    int id;
 
+  };
   typedef SmartCar Gangster;
   typedef int Cop;
 
   std::vector<Gangster> gangsters ( boost::asio::ip::tcp::socket & socket, int id, osmium::unsigned_object_id_type cop );
+  justine::sampleclient::MyShmClient::Gangster gengitavok ( boost::asio::ip::tcp::socket & socket);
   std::vector<Cop> initcops ( boost::asio::ip::tcp::socket & socket );
   void pos ( boost::asio::ip::tcp::socket & socket, int id );
   void car ( boost::asio::ip::tcp::socket & socket, int id, unsigned *f, unsigned *t, unsigned* s );
