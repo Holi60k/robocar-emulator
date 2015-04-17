@@ -107,8 +107,8 @@ justine::sampleclient::MyShmClient::Gangster justine::sampleclient::MyShmClient:
 
   /* reading all gangsters into a vector */
   int idd{0};
-  unsigned f,t,s, ff,tt,ss;
-  unsigned int DT,g;
+  unsigned f,t,s;
+  unsigned int g;
   int n{0};
   int nn{0};
   //gengi vektor
@@ -117,20 +117,20 @@ justine::sampleclient::MyShmClient::Gangster justine::sampleclient::MyShmClient:
   while (std:: sscanf (data + nn, "<OK %d %u %u %u>%n", &idd, &f, &t, &s, &n) == 4) //
     {
       nn += n;
-      gangsters.push_back (Gangster{idd, f, t, s});
+      gangsters.push_back (Gangster{idd, f, t, (int)s});
     }
   
   //rendezzük őket nem egy rendőrhöz képest hanem egymáshoz :O
   //tehát mindig kiválasztunk egy gengit és 
   
   Gangster gl,rg;
-  unsigned int max = 0;
+  int max = 0;
   for(auto it = gangsters.begin(); it != gangsters.end(); it++)
   {      
 	gl = *it;
 	gl.neargang = 0;
 	
-  	for(int i = 0; i < gangsters.size(); i++)
+  	for(int i = 0; i < (int)gangsters.size(); i++)
   	{
   		g = gangsters[i].to;
   		if( dst(gl.to,g) < 2000)
@@ -201,32 +201,24 @@ std::vector < justine::sampleclient::MyShmClient::Gangster >
 
   /* reading all gangsters into a vector */
   int idd{0};
-  unsigned f,t,s,g;
+  unsigned f,t;
+  int s;
   int n{0};
   int nn{0};
   std::vector < Gangster > gangsters;
 
-  while (std::
-	 sscanf (data + nn, "<OK %d %u %u %u>%n", &idd, &f, &t, &s, &n) == 4) //
+  while (std::sscanf (data + nn, "<OK %d %u %u %u>%n", &idd, &f, &t, &s, &n) == 4) //
     {
       nn += n;
       gangsters.push_back (Gangster{idd, f, t, s});
     }
    
-  Gangster gl;
-
-   std::sort (gangsters.begin (), gangsters.end (),
+ std::sort (gangsters.begin (), gangsters.end (),
 	     [this, cop] (Gangster x, Gangster y)
 	     {
 	     return dst (cop, x.to) < dst (cop, y.to);}
   );
-  /*std::sort (gangsters.begin (), gangsters.end (),
-	     [] (Gangster x, Gangster y)
-	     {
-	     return x.neargang > y.neargang;
-	       
-	    }
-  );*/
+  
   //std::cout.write ( data, length );
   //std::cout << "Command GANGSTER sent." << std::endl;
 
@@ -361,21 +353,16 @@ justine::sampleclient::MyShmClient::pos (boost::asio::ip::tcp::
 
 
 void
-justine::sampleclient::MyShmClient::route (boost::asio::ip::tcp::
-					   socket & socket, int id,
-					   std::vector <
-					   osmium::unsigned_object_id_type >
-					   &path)
-{
+justine::sampleclient::MyShmClient::route (boost::asio::ip::tcp::socket & socket, int id,std::vector <osmium::unsigned_object_id_type >&path){
 
   boost::system::error_code err;
 
-  size_t
-    length = std::sprintf (data,
-			   "<route %d %d", path.size (), id);
+  size_t length = std::sprintf (data,"<route %lu %d", path.size (), id);
 
-for (auto ui:path)
-    length += std::sprintf (data + length, " %u", ui);
+  for (auto ui:path){
+
+  	length += std::sprintf (data + length, " %lu", ui);
+  }
 
   length += std::sprintf (data + length, ">");
 
@@ -403,9 +390,7 @@ for (auto ui:path)
 }
 
 void
-justine::sampleclient::MyShmClient::start (boost::asio::
-					   io_service & io_service,
-					   const char *port)
+justine::sampleclient::MyShmClient::start (boost::asio::io_service & io_service,const char *port)
 {
 
 #ifdef DEBUG
@@ -413,99 +398,86 @@ justine::sampleclient::MyShmClient::start (boost::asio::
 #endif
 
   boost::asio::ip::tcp::resolver resolver (io_service);
-  boost::asio::ip::tcp::resolver::query query (boost::asio::ip::tcp::v4 (),
-					       "localhost", port);
-  boost::asio::ip::tcp::resolver::iterator iterator =
-    resolver.resolve (query);
+  boost::asio::ip::tcp::resolver::query query (boost::asio::ip::tcp::v4 (),"localhost", port);
+  boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve (query);
 
   boost::asio::ip::tcp::socket socket (io_service);
   boost::asio::connect (socket, iterator);
 
-  int
-    id = init (socket);
+  int id = init (socket);
 
   pos (socket, id);
 
   unsigned int
-    g
-  {
-  0u};
-  unsigned int
-    gg
-  {
-  0u};
-  unsigned int
-    f
-  {
-  0u};
-  unsigned int
-    t
-  {
-  0u};
-  unsigned int
-    s
-  {
-  0u};
-   double lo,la;
- car (socket, id, &f, &t, &s);
-   //gangstereket egy vectorba menjtük
+    g{0u}, gg{0u}, f{0u}, t{0u}, s{0u};
+
+  car (socket, id, &f, &t, &s);
+  //gangstereket egy vectorba menjtük
   std::vector < Gangster > gngstrs;
   std::vector < Gangster >::iterator it;
   int GC = 0;
   justine::sampleclient::MyShmClient::Gangster MG;
-//végtelen ciklussal "futtatjuk" az algoritmusunkat
+  //végtelen ciklussal "futtatjuk" az algoritmusunkat
   for (;;)
     {
     	
       std::this_thread::sleep_for (std::chrono::milliseconds (200));
-		MG = gengitavok(socket);
+	  MG = gengitavok(socket);
       car (socket, id, &f, &t, &s);
       
       gngstrs = gangsters (socket, id, t);
 
-      if (gngstrs.size () > 0)
-	g = gngstrs[0].to;
-      else
-	g = 0;
-      if (g > 0)
-	{
-	
-	 //std::cout << "\n";
-	  //gatlag /= i;
-	  //sleep (1);
-	  //std::cout << "A:" << gatlag << "\n";
-	  GC = 0;
-	  for(int i = 0; i < gngstrs.size(); i++)
-	  {
-	    gg = gngstrs[i].to;
-	    if(dst(t,gg) < DIST)
-	    {
-	      GC++;
-	    }
+      if (gngstrs.size () > 0){
+
+			g = gngstrs[0].to;
 	  }
+
+	  else{
+
+			g = 0;
+	  }
+
+      if (g > 0){
+
+		  //std::cout << "\n";
+		  //gatlag /= i;
+		  //sleep (1);
+		  //std::cout << "A:" << gatlag << "\n";
+		  GC = 0;
+		  for(int i = 0; i < (int)gngstrs.size(); i++){
+
+		    gg = gngstrs[i].to;
+		    if(dst(t,gg) < DIST){
+
+		      	GC++;
+
+		    }
+		  }
 	  
 	  std::cout<< DIST <<"egységnyi távolságon belüli gengszterek száma:" << GC <<std::endl;
 	  std::vector <osmium::unsigned_object_id_type> pathG = hasDijkstraPath(t,MG.to);
-	  std::vector < osmium::unsigned_object_id_type > path =
-	    hasDijkstraPath (t, g);
-	    std::cout << "Legtöbb gengis és a rendőrbácsi távolsága:" << dst(t,MG.to) << " gengijei:"<< MG.neargang <<std::endl;
-	  if (path.size () > 1)
-	    {
-		if(dst(t,MG.to) < DIST*2)
-		{
-	      //std::copy ( path.begin(), path.end(),
-	      //          std::ostream_iterator<osmium::unsigned_object_id_type> ( std::cout, " -> " ) );
-			std::cout << "Legközelebbi gengit kergetem!" << std::endl;
-	      route (socket, id, path);
-	     }
-	     else
-	     {
+	  std::vector < osmium::unsigned_object_id_type > path = hasDijkstraPath (t, g);
+      std::cout << "Legtöbb gengis és a rendőrbácsi távolsága:" << dst(t,MG.to) << " gengijei:"<< MG.neargang <<std::endl;
+
+	  if (path.size () > 1){
+
+		 if(dst(t,MG.to) < DIST*2){
+
+		      //std::copy ( path.begin(), path.end(),
+		      //          std::ostream_iterator<osmium::unsigned_object_id_type> ( std::cout, " -> " ) );
+				std::cout << "Legközelebbi gengit kergetem!" << std::endl;
+		      route (socket, id, path);
+		     }
+
+	     else{
+
 	     	std::cout << "legtöbb gengishez megyek! - " << MG.to << " gengijei:"<< MG.neargang <<std::endl;
 	     	route(socket,id,pathG);
 	     }
+
 	    }
 	}
-    }
+  }
 }
 
 void
@@ -516,42 +488,28 @@ justine::sampleclient::MyShmClient::start10 (boost::asio::io_service & io_servic
 #endif
 
   boost::asio::ip::tcp::resolver resolver (io_service);
-  boost::asio::ip::tcp::resolver::query query (boost::asio::ip::tcp::v4 (),
-					       "localhost", port);
-  boost::asio::ip::tcp::resolver::iterator iterator =
-    resolver.resolve (query);
+  boost::asio::ip::tcp::resolver::query query (boost::asio::ip::tcp::v4 (),"localhost", port);
+  boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve (query);
 
   boost::asio::ip::tcp::socket socket (io_service);
   boost::asio::connect (socket, iterator);
 
   std::vector < Cop > cops = initcops (socket);
 
-  unsigned int
-    g{0u};
-  unsigned int
-    gl{0u};
-  unsigned int
-    gg{0u};
-  unsigned int
-    f{0u};
-  unsigned int
-    t{0u};
-    unsigned int
-    ct{0u};
-  unsigned int
-    s{0u};
-
+  unsigned int g{0u}, gg{0u}, f{0u}, t{0u}, s{0u}, ct{0u};
+ 
   unsigned int ds = 2000;
 
   std::vector < Gangster > gngstrs,gtavok;
   int p = 0;
-  bool isMade = false;
+  
   //int CopOk[10] = {0,0,0,1,1,1,1,1,1,1};
-
-  int Help [10] = {0};
-  unsigned int  MGC = 2000;
+  //int Help [10] = {0};
+  //védéshez kellett...
+  //unsigned int  MGC = 2000;
+  //bool isMade = false;
   //GD a distancehez kell ebben tároljuk el milyen ...
-  unsigned int GD[11] = {0};
+  //unsigned int GD[11] = {0};
   //GP lesz a gengszterek száma rendőrönként
   unsigned int GP[11] = {0};
   unsigned int CTC[10];
@@ -559,7 +517,9 @@ justine::sampleclient::MyShmClient::start10 (boost::asio::io_service & io_servic
   unsigned int BCOP = 0;
   unsigned int BCOPR[10] = {0};
   justine::sampleclient::MyShmClient::Gangster MG;
-  //unsigned int l,k = 0;
+
+  /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
+  //v.0.1
   //Rádius keresés - mérték egyenlőre állandó vagy dinamikusan az aktuális helyzetekhez kialakított
   //Gengszterek számának meghatározása "területenként", az aktuális egységnyi sugarú "körön" belül
   //Akinél nincs gengszter elindul a legközelebb lévő rendőrhöz hogy segítsen neki.
@@ -587,7 +547,7 @@ justine::sampleclient::MyShmClient::start10 (boost::asio::io_service & io_servic
     std::this_thread::sleep_for (std::chrono::milliseconds (200));
     //A p lesz nekünk mindig az aktuális index, szükségszerűen most itt nullázik ki.
     p = 0;
-    isMade = false;
+    //isMade = false;
     MGP = 0;
     //BCOPR[p] = 0;
   	MG = gengitavok(socket);
@@ -600,7 +560,7 @@ justine::sampleclient::MyShmClient::start10 (boost::asio::io_service & io_servic
 		GP[p] = 0;
 		car (socket, *it, &f, &t, &s);
 		//gtavok = gengitavok(socket,*it);
-		 for(int i = 0; i < gngstrs.size(); i++){
+		 for(int i = 0; i < (int)gngstrs.size(); i++){
 		  gngstrs = gangsters (socket, *it, t);
 			gg = gngstrs[i].to;	
 			      if(dst(t,gg) < DIST){
