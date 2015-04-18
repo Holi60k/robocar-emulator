@@ -464,7 +464,7 @@ public:
 
     return path;
   }
-
+  
 
 protected:
 
@@ -506,10 +506,24 @@ private:
     std::copy ( pathBF.begin(), pathBF.end(),
                 std::ostream_iterator<osmium::unsigned_object_id_type> ( std::cout, " -BF-> " ) );
 
+     std::cout << std::endl;
+    pathBF = hasDijkstraPath ( 2969934868, 1402222861 );
+    std::copy ( pathD.begin(), pathD.end(),
+                std::ostream_iterator<osmium::unsigned_object_id_type> ( std::cout, "  -DD-> " ) );
+    if(pathD == pathBF)
+    {
+      std::cout<< "Egyenlo a ket utvonal!"<<std::endl;
+    }
+
   }
 
   int init ( boost::asio::ip::tcp::socket & socket );
 
+  
+  struct CopCarH
+  {
+    int id;
+  };
   struct SmartCar
   {
     int id;
@@ -517,11 +531,6 @@ private:
     unsigned to;
     int step;
     int neargang;
-  };
-  struct CopCarH
-  {
-    int id;
-
   };
   typedef SmartCar Gangster;
   typedef int Cop;
@@ -532,6 +541,7 @@ private:
   void pos ( boost::asio::ip::tcp::socket & socket, int id );
   void car ( boost::asio::ip::tcp::socket & socket, int id, unsigned *f, unsigned *t, unsigned* s );
   void route ( boost::asio::ip::tcp::socket & socket, int id, std::vector<osmium::unsigned_object_id_type> & );
+  bool CanIRoute(unsigned int[],int,int,int);
 };
 
 }
