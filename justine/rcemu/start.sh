@@ -4,7 +4,7 @@ shm="SharedMemory"
 nodegps="../debrecen-lmap.txt"
 osm="../debrecen.osm"
 city="Debrecen"
-gangst=50
+gangst=100
 
 src/smartcity --osm=$osm --city=$city --shm=$shm --node2gps=$nodegps&
 sleep 1

@@ -535,13 +535,13 @@ private:
   typedef SmartCar Gangster;
   typedef int Cop;
 
-  std::vector<Gangster> gangsters ( boost::asio::ip::tcp::socket & socket, int id, osmium::unsigned_object_id_type cop );
+  std::vector<Gangster> gangsters ( boost::asio::ip::tcp::socket & socket, int id, osmium::unsigned_object_id_type cop, Gangster * rg);
   justine::sampleclient::MyShmClient::Gangster gengitavok ( boost::asio::ip::tcp::socket & socket);
   std::vector<Cop> initcops ( boost::asio::ip::tcp::socket & socket );
   void pos ( boost::asio::ip::tcp::socket & socket, int id );
   void car ( boost::asio::ip::tcp::socket & socket, int id, unsigned *f, unsigned *t, unsigned* s );
   void route ( boost::asio::ip::tcp::socket & socket, int id, std::vector<osmium::unsigned_object_id_type> & );
-  bool CanIRoute(unsigned int[],int,int,int);
+  bool CanIRoute(unsigned int cops_route_id[], int cop_index, unsigned int gangster, int initialized_Cops);
 };
 
 }
