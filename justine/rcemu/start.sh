@@ -11,7 +11,7 @@ sleep 1
 src/traffic --port=$port --shm=$shm&
 sleep 1
 (sleep 1; echo "<init Norbi $gangst g>"; sleep 1)|telnet localhost $port
-sleep 3
+sleep 1
 src/samplemyshmclient --port=$port --shm=$shm --team=$teamname&
 sleep 1
 #(sleep 1; echo "<init Norbi $gangst g>"; sleep 1)|telnet localhost $port

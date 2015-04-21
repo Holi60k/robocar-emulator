@@ -376,6 +376,8 @@ void justine::robocar::Traffic::toGPS ( osmium::unsigned_object_id_type from,
 
   *lo = lon1;
   *la = lat1;
+ 
+  return ;
 
 }
 
