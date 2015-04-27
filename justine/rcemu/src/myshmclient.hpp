@@ -531,6 +531,8 @@ private:
     unsigned to;
     int step;
     int neargang;
+    //melyik "szektorban" van a gangszter
+    int sector;
   };
   typedef SmartCar Gangster;
   typedef int Cop;
@@ -541,8 +543,8 @@ private:
   void pos ( boost::asio::ip::tcp::socket & socket, int id );
   void car ( boost::asio::ip::tcp::socket & socket, int id, unsigned *f, unsigned *t, unsigned* s );
   void route ( boost::asio::ip::tcp::socket & socket, int id, std::vector<osmium::unsigned_object_id_type> & );
-  bool CanIRoute(unsigned int cops_route_id[], int cop_index, unsigned int gangster, int initialized_Cops);
-  int Howmanygangstersinthearea(double lo, double la, std::vector<Gangster> gang);
+  bool CanIRoute(unsigned int cops_route_id[], int cop_index, unsigned int gangster, int initialized_Cops, unsigned int  CFroms[]);
+  int Howmanygangstersinthearea(unsigned int Node, std::vector<Gangster> gang, int Rate);
 };
 
 }
