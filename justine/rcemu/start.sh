@@ -4,8 +4,8 @@ shm="SharedMemory"
 nodegps="../debrecen-lmap.txt"
 osm="../debrecen.osm"
 city="Debrecen"
-gangst=100
-
+gangst=200
+gan=100
 src/smartcity --osm=$osm --city=$city --shm=$shm --node2gps=$nodegps&
 sleep 1
 src/traffic --port=$port --shm=$shm&
@@ -14,8 +14,8 @@ sleep 1
 sleep 1
 src/samplemyshmclient --port=$port --shm=$shm --team=$teamname&
 sleep 1
-#(sleep 1; echo "<init Norbi $gangst g>"; sleep 1)|telnet localhost $port
-##sleep 1
+(sleep 1; echo "<init Norbi $gan g>"; sleep 1)|telnet localhost $port
+sleep 1
 cd ..
 cd rcwin
 sleep 1

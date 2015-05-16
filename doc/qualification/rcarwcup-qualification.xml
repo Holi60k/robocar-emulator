@@ -3,30 +3,30 @@
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude">    
     <info>
-        <title>Team Name</title>
+        <title>HNK</title>
         <subtitle>Team Qualification Paper</subtitle>
         <authorgroup>
             <author>
                 <personname>
                     <honorific></honorific>
-                    <surname>LeaderSurname</surname>
-                    <firstname>LeaderFirstname</firstname>        
+                    <surname>Nándor</surname>
+                    <firstname>Holozsnyák</firstname>        
                 </personname>    
                 <affiliation>
                     <shortaffil></shortaffil>
-                    <jobtitle></jobtitle>
-                    <orgname></orgname>
+                    <jobtitle>Student</jobtitle>
+                    <orgname>University of Debrecen</orgname>
                     <orgdiv></orgdiv>
                     <address>
-                        <email></email>
+                        <email>holi60@gmail.com</email>
                     </address>
                 </affiliation>
                 <address>
-                    <street></street>
-                    <city></city>
-                    <postcode></postcode>
-                    <country></country>
-                    <email></email>
+                    <street>Irinyi János utca 8</street>
+                    <city>Tiszavasvári</city>
+                    <postcode>4440</postcode>
+                    <country>Hungary</country>
+                    <email>holi60@gmail.om</email>
                     <otheraddr>
                         <link xlink:href=""></link>
                     </otheraddr>
@@ -35,8 +35,8 @@
             <author>
                 <personname>
                     <honorific></honorific>
-                    <surname>MemberSurname</surname>
-                    <firstname>MemberFirstname</firstname>        
+                    <surname></surname>
+                    <firstname></firstname>        
                 </personname>    
                 <affiliation>
                     <shortaffil></shortaffil>
@@ -59,63 +59,67 @@
                 </address>
             </author>            
         </authorgroup>
-        <pubdate>2014</pubdate>
+        <pubdate>2015</pubdate>
     </info>                                                                                                
     <para>
-        Team logo:
+        
     </para>
     <mediaobject>
         <imageobject>
-            <imagedata fileref="" scale="45"/>
+            <imagedata fileref="logo.jpg" scale="45"/>
         </imageobject>
         <textobject>
             <phrase>
-                Team logo
+                -
             </phrase>
         </textobject>
     </mediaobject>    
     <para>
-        Qualification video:
+        Qualification video: 
     </para>
     <itemizedlist>
         <listitem>
             <para>
-                <link xlink:href=""></link>
+                <link xlink:href="https://www.youtube.com/watch?v=9YFZZ8t33H0">https://www.youtube.com/watch?v=9YFZZ8t33H0</link>
             </para>
         </listitem>
     </itemizedlist>
     <para>        
-        Under what license is your source code released?
+        Under what license is your source code released? 
     </para>
     <itemizedlist>
         <listitem>
             <para>
+                GNU GPL v3
             </para>
         </listitem>
     </itemizedlist>    
     <para>
-        Where is your repo?
+        Where is your repo? 
     </para>
     <itemizedlist>
         <listitem>
             <para>
-                <link xlink:href=""></link>
+                <link xlink:href="https://github.com/Holi60k/robocar-emulator">A forked repo from the original source code!</link>
             </para>
         </listitem>
     </itemizedlist>
     <para>        
-        Please list the highlights of your project (one or two sentences per item).
+        Please list the highlights of your project (one or two sentences per item). 
         <itemizedlist>
             <listitem>
                 <para>
+                     Radius Searching. There is always a 'BOSS' cop, which is used to show the area where are our gangsters number is the highest.
                 </para>
             </listitem>
             <listitem>
                 <para>
+                   Added some base nodes, an algorithm calculate the distance between the BOSS cop and the nearest base node and then send the actual cop to the nearest sector if it is more valuable than the BOSS cop sector.
                 </para>
             </listitem>
             <listitem>
                 <para>
+                   Added some trivial functions, a gangster won't be followed by two cops, and a sector search function which gives us the number of the gangsters per sectors.
                 </para>
             </listitem>
         </itemizedlist>

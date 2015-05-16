@@ -618,7 +618,7 @@ justine::sampleclient::MyShmClient::start10 (boost::asio::io_service & io_servic
  int GangInArea[5] = {0};
  //bázis nodeok - belváros, mikepércs,hajdúsámson fele, pusztaság1, pusztaság2
  unsigned int Base_Nodes[5] = {974491107,1842536147,1369864447,2092267434,1830082184};
- int Cop_Nearest_Sector_DST[10] = {DIST*2};
+ double Cop_Nearest_Sector_DST[10] = {DIST*2};
  int Cop_Nearest_Sector[10] = {0};
   
   /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -657,9 +657,11 @@ justine::sampleclient::MyShmClient::start10 (boost::asio::io_service & io_servic
       //isMade = false;
       MGP = 0;
       //BCOPR[p] = 0;
+
 #ifdef IterationS
       std::cout << "----------------------- "<< Iteration++ <<" -----------------------------"<< std::endl;
 #endif
+
       //lekérjük az MG változóba a legnagyobb gegszterszámmal rendelkező gengsztert...
       //MG = gengitavok(socket);
  
@@ -670,18 +672,26 @@ justine::sampleclient::MyShmClient::start10 (boost::asio::io_service & io_servic
       for (auto it = cops.begin(); it != cops.end(); it++) {
 	       //kinullázik a GP-t minden egyes iterációban.
 	      GP[Actual_Cop] = 0;
+        Cop_Nearest_Sector_DST[Actual_Cop] = DIST*20;
 	      //itt lekérjük kisautót 
 	      car (socket, *it, &from[Actual_Cop], &to, &step);
 	      //toGPS(from,&lo,&la);
 	      //milyen messze vagyunk az 5 fő bázistól
-	      for (int i = 0; i < 5; i++) {
-		        Cop_Place_Dist[Actual_Cop][i] = dst(to,Base_Nodes[i]);
 
-            if(Cop_Place_Dist[Actual_Cop][i] < Cop_Nearest_Sector[Actual_Cop])
+        //std::cout <<"Körzetek távolsága: " << Actual_Cop << std::endl;
+	      for (int i = 0; i < 5; i++) {
+
+		       // Cop_Place_Dist[Actual_Cop][i] = dst(from[Actual_Cop],Base_Nodes[i]);
+            //if(Actual_Cop == 0)
+              //std::cout << i << ". körzet távolsága:" << dst(from[Actual_Cop],Base_Nodes[i]) << std::endl;
+
+            if(dst(from[Actual_Cop],Base_Nodes[i]) < Cop_Nearest_Sector_DST[Actual_Cop])
             {
-              Cop_Nearest_Sector_DST[Actual_Cop] = Cop_Place_Dist[Actual_Cop][i];
+              Cop_Nearest_Sector_DST[Actual_Cop] = dst(from[Actual_Cop],Base_Nodes[i]);
               Cop_Nearest_Sector[Actual_Cop] = i;
-            }
+              //std::cout << "Szektort váltottam - " << Actual_Cop << " ide " << Cop_Nearest_Sector[Actual_Cop] << " távolsága: " << Cop_Nearest_Sector_DST[Actual_Cop] << std::endl;
+             }
+
 
 
 	      }
@@ -690,24 +700,24 @@ justine::sampleclient::MyShmClient::start10 (boost::asio::io_service & io_servic
 	      for (int i = 0; i < (int) gngstrs[Actual_Cop].size(); i++) {
      
 		      gg = gngstrs[Actual_Cop][i].to;
+
 		      if (dst(to,gg) < DIST) {
 
-				GP[Actual_Cop]++;
-				//std::cout << "GP["<< Actual_Cop <<"]"<< GP[Actual_Cop] << std::endl;
-
+    				GP[Actual_Cop]++;
 		      }
 		      
-		}
+		    }
 
-		if (GP[Actual_Cop] > MGP) {
-		  
-			      BCOP = to;
-			      BCOPID = Actual_Cop;
-			      MGP = GP[Actual_Cop];
-		}
-		
-		Actual_Cop++;
-      }
+    		if (GP[Actual_Cop] > MGP) {
+    		  
+    			      BCOP = to;
+    			      BCOPID = Actual_Cop;
+    			      MGP = GP[Actual_Cop];
+    		}
+  		
+  		Actual_Cop++;
+    }
+
       std::cout  <<  "Maximum gangsters around the 'Boss' cop:" << MGP <<std::endl << "The Boss Cop is: " << BCOPID<<std::endl;;
       Actual_Cop = 0;
   
@@ -718,133 +728,133 @@ justine::sampleclient::MyShmClient::start10 (boost::asio::io_service & io_servic
       //for ciklussal fogjuk bejárni a cop vektorunkat, ebben a verzióban én most lecseréltem az auto cop:cops -os bejárást, jelenelg nekem az iterátoros megoldás jobban tetszik :)
       for (auto it = cops.begin(); it != cops.end(); it++) {
 
-	    //car függvény meghívása, f- honnan ,t - hova, s - hanyadik lépésnél járhat (tipp)
-	    car (socket, *it, &from[Actual_Cop], &to, &step);
-	    //Cop_route_ID[Actual_Cop] = to;
-	    //gngstrs = gangsters (socket, *it, to,&MG);
-	    //BCOPR[Actual_Cop] = to;
-	    #ifdef DEBUG
-	    //if (Actual_Cop == BCOPID) {
-	      //std::cout << "I am the boss cop, ID:"<<Actual_Cop<<std::endl;
-	    //}
-	    #endif
-	    //std::cout << "Rendor:" << *it << " Honnan:" << f << " Hova:" << t << " Lépés:" << s << std::endl;
-	  
-	    
-	    //össze szeretném gyűjteni a rendőrök X egységnyi sugarán belüli gengsztereket,
-	    //és ezek alapján eldönteni hogy melyik "területen" érdemes a gengsztereket üldözni
-	    //ha van gengink akkor szépen lőjük az algoritmust
 
-	    if (gngstrs[Actual_Cop].size() > 0) {
-		#ifdef DEBUG
-		  std::cout << Actual_Cop << ". rendor körzetében " << GP[Actual_Cop] << "gengi..." << std::endl;
-		#endif
-		//ha nulla a gengszterszám akkor elindulunk a legnagyobb gengivel rendelkező zsaru felé, a főnök zsaru felé
-		//ha 0 vagy a fele kisebb mint a legnagyobb számú rendőré és nem csinál semmit vagy ha a táv kisebb mint X hogyha van a közelében gengi
-		//|| ( (GP[Actual_Cop] < MGP/3) && BCOPR[Actual_Cop] == 0)
-		
-		if ( GP[Actual_Cop] == 0 || (dst(to,BCOP) < DIST*2 && MGP/2 > GP[Actual_Cop]) ) {
-		  
-		      std::vector<osmium::unsigned_object_id_type> nogpath = hasDijkstraPath ( to, BCOP );
-		      #ifdef DEBUG
-		      std::cout << Actual_Cop << ". rendor elindult a kitüntetett rendőr irányába." << std::endl;
-		      #endif
-          //rendőr státusz
-		      BCOPR[Actual_Cop] = 1;
-		      Cop_route_ID[Actual_Cop] = BCOP;
-		      route(socket,*it,nogpath);
-		      
-		//ha már elég közel kerültem a boss cophoz akkor elkezdem begyűjteni a körülette levő gengsztereket, amely hozzám a legközelebb van és persze nem üldözi senki! :)
-		//|| (BCOPR[Actual_Cop] == 2 && dst(to,MG.to) < DIST ) 
-    } else if ( (BCOPR[Actual_Cop] == 1 && (dst(to,BCOP) < DIST))  || (BCOPR[Actual_Cop] == 3 && (Cop_Nearest_Sector_DST[Actual_Cop] < DIST)) || GP[Actual_Cop] > MGP/3) {
-       gngstrs[Actual_Cop] = gangsters (socket, *it, to,&MG);
-           for (int i = 0; i < (int)gngstrs[Actual_Cop].size(); i++) {       
-            
-              if (CanIRoute(Cop_route_ID,Actual_Cop,gngstrs[Actual_Cop][i].to,Initialized_Cops,from)) {
+
+
+
+    	    //car függvény meghívása, f- honnan ,t - hova, s - hanyadik lépésnél járhat (tipp)
+    	    car (socket, *it, &from[Actual_Cop], &to, &step);
+
+          //std::cout << Actual_Cop << "." << std::endl;
+          //std::cout << "Cop nearest sector " << Cop_Nearest_Sector[Actual_Cop] << " DST:" << Cop_Nearest_Sector_DST[Actual_Cop] << std::endl;
+          //std::cout << "Distance from BOSS cop:" << dst(to,BCOP) << std::endl;
+    	    //Cop_route_ID[Actual_Cop] = to;
+    	    //gngstrs = gangsters (socket, *it, to,&MG);
+    	    //BCOPR[Actual_Cop] = to;
+    	    #ifdef DEBUG
+    	    //if (Actual_Cop == BCOPID) {
+    	      //std::cout << "I am the boss cop, ID:"<<Actual_Cop<<std::endl;
+    	    //}
+    	    #endif
+    	    //std::cout << "Rendor:" << *it << " Honnan:" << f << " Hova:" << t << " Lépés:" << s << std::endl;
+    	  
+    	    
+    	    //össze szeretném gyűjteni a rendőrök X egységnyi sugarán belüli gengsztereket,
+    	    //és ezek alapján eldönteni hogy melyik "területen" érdemes a gengsztereket üldözni
+    	    //ha van gengink akkor szépen lőjük az algoritmust
+
+    	    if (gngstrs[Actual_Cop].size() > 0) {
+    		#ifdef DEBUG
+    		  std::cout << Actual_Cop << ". rendor körzetében " << GP[Actual_Cop] << "gengi..." << std::endl;
+    		#endif
+
+    		//ha nulla a gengszterszám akkor elindulunk a legnagyobb gengivel rendelkező zsaru felé, a főnök zsaru felé
+    		//ha 0 vagy a fele kisebb mint a legnagyobb számú rendőré és nem csinál semmit vagy ha a táv kisebb mint X hogyha van a közelében gengi
+    		//|| ( (GP[Actual_Cop] < MGP/3) && BCOPR[Actual_Cop] == 0)
+    		
+    		if ( GP[Actual_Cop] == 0 || (dst(to,BCOP) < DIST*2 && MGP/4 > GP[Actual_Cop] && BCOPR[Actual_Cop] == 0) || GP[Actual_Cop] < MGP/4 ) {
+    		  
+    		      std::vector<osmium::unsigned_object_id_type> nogpath = hasDijkstraPath ( to, BCOP );
+    		      #ifdef DEBUG
+    		      std::cout << Actual_Cop << ". rendor elindult a kitüntetett rendőr irányába." << std::endl;
+    		      #endif
+              //rendőr státusz
+    		      BCOPR[Actual_Cop] = 1;
+    		      Cop_route_ID[Actual_Cop] = BCOP;
+    		      route(socket,*it,nogpath);
+    		      
+    		//ha már elég közel kerültem a boss cophoz akkor elkezdem begyűjteni a körülette levő gengsztereket, amely hozzám a legközelebb van és persze nem üldözi senki! :)
+    		//|| (BCOPR[Actual_Cop] == 2 && dst(to,MG.to) < DIST ) 
+
+        } else if ( (BCOPR[Actual_Cop] == 1 && (dst(to,BCOP) < DIST))  || (BCOPR[Actual_Cop] == 3 && (Cop_Nearest_Sector_DST[Actual_Cop] < DIST)) || GP[Actual_Cop] > MGP/3) {
+           gngstrs[Actual_Cop] = gangsters (socket, *it, to,&MG);
+
+               for (int i = 0; i < (int)gngstrs[Actual_Cop].size(); i++) {       
+                   if (CanIRoute(Cop_route_ID,Actual_Cop,gngstrs[Actual_Cop][i].to,Initialized_Cops,from)) {
+                        path[Actual_Cop] = hasDijkstraPath ( to, gngstrs[Actual_Cop][i].to );
+                        Cop_route_ID[Actual_Cop] = gngstrs[Actual_Cop][i].to;
+                        break;
+                  }         
+              }
+
+              BCOPR[Actual_Cop] = 0;
+              if (path[Actual_Cop].size () > 1) {
+          
+               route (socket, *it, path[Actual_Cop]);
+              }
+
+    		/*} else if ( (BCOPR[Actual_Cop] == 0 && (DIST > Cop_Nearest_Sector_DST[Actual_Cop]) && GangInArea[Cop_Nearest_Sector[Actual_Cop]] > MGP/2  )) {
+    		  
+              path[Actual_Cop] = hasDijkstraPath ( to, Base_Nodes[Cop_Nearest_Sector[Actual_Cop]] );
+              Cop_route_ID[Actual_Cop] = Base_Nodes[Cop_Nearest_Sector[Actual_Cop]];
+              BCOPR[Actual_Cop] = 3;
+
+    		      if (path[Actual_Cop].size () > 1) {
+    			         
+                    #ifdef DEBUG
+                    std::cout << Actual_Cop << ". cop is routing to the nearest sector to catch GANGSTERS!\nThe sector is "<< Cop_Nearest_Sector[Actual_Cop] << std::endl;
+                    #endif
+    				      route (socket, *it, path[Actual_Cop]);
+    				
+    		      }*/
+    		
+    	      //Boss Cop mit csinál?! Megy a legközelebbi gengszterre, mindig elsőbsége van.
+    	      } else if(BCOPR[Actual_Cop] == 0 || GP[Actual_Cop] > MGP/2) {
+    		
+    			    gngstrs[Actual_Cop] = gangsters (socket, *it, to,&MG);
+    			    for (int i = 0; i < (int)gngstrs[Actual_Cop].size(); i++) {
+    			      
+      				  if (CanIRoute(Cop_route_ID,Actual_Cop,gngstrs[Actual_Cop][i].to,Initialized_Cops,from)) {				    
+      					  path[Actual_Cop] = hasDijkstraPath ( to, gngstrs[Actual_Cop][i].to );
+      					  Cop_route_ID[Actual_Cop] = gngstrs[Actual_Cop][i].to;
+      					  //std::cout << Actual_Cop << " is routing to: "<< Cop_route_ID[Actual_Cop] << " in the ELSE." << std::endl;
+      					  break;				  
+      				  }					
+    			    }
+    		 
+    		  if (path[Actual_Cop].size () > 1) {
+    		    
+    			    route (socket, *it, path[Actual_Cop]);
+    		  }
+    		  //std::cout << Actual_Cop << " - ELSE AGBA ESTEM BELE!!"<< std::endl;
+    	    } else {
+        
+              gngstrs[Actual_Cop] = gangsters (socket, *it, to,&MG);
+              
+              for (int i = 0; i < (int)gngstrs[Actual_Cop].size(); i++) {
                 
-                path[Actual_Cop] = hasDijkstraPath ( to, gngstrs[Actual_Cop][i].to );
-                Cop_route_ID[Actual_Cop] = gngstrs[Actual_Cop][i].to;
-                break;
-              }         
+                if (CanIRoute(Cop_route_ID,Actual_Cop,gngstrs[Actual_Cop][i].to,Initialized_Cops,from)) {           
+                  path[Actual_Cop] = hasDijkstraPath ( to, gngstrs[Actual_Cop][i].to );
+                  Cop_route_ID[Actual_Cop] = gngstrs[Actual_Cop][i].to;
+                  //std::cout << Actual_Cop << " is routing to: "<< Cop_route_ID[Actual_Cop] << " in the ELSE." << std::endl;
+                  break;          
+                }         
+              }
+         
+            if (path[Actual_Cop].size () > 1) {
+              
+                route (socket, *it, path[Actual_Cop]);
+            }
+          //std::cout << Actual_Cop << " - ELSE AGBA ESTEM BELE!!"<< std::endl;
           }
-          BCOPR[Actual_Cop] = 0;
-          if (path[Actual_Cop].size () > 1) {
-      
-           route (socket, *it, path[Actual_Cop]);
-          }
-
-		} else if ( (BCOPR[Actual_Cop] == 0 && (dst(to,BCOP) > Cop_Nearest_Sector_DST[Actual_Cop]) && GangInArea[Cop_Nearest_Sector[Actual_Cop]] > MGP/2  )) {
-		  
-		       /*gngstrs[Actual_Cop] = gangsters (socket, *it, to,&MG);
-		       for (int i = 0; i < (int)gngstrs[Actual_Cop].size(); i++) {			 
-				    
-  				    if (CanIRoute(Cop_route_ID,Actual_Cop,gngstrs[Actual_Cop][i].to,Initialized_Cops,from)) {
-  					    
-  					    path[Actual_Cop] = hasDijkstraPath ( to, gngstrs[Actual_Cop][i].to );
-  					    Cop_route_ID[Actual_Cop] = gngstrs[Actual_Cop][i].to;
-  					    
-  					    break;
-  				    }					
-			}*/
-          path[Actual_Cop] = hasDijkstraPath ( to, Base_Nodes[Cop_Nearest_Sector[Actual_Cop]] );
-          Cop_route_ID[Actual_Cop] = Base_Nodes[Cop_Nearest_Sector[Actual_Cop]];
-          BCOPR[Actual_Cop] = 3;
-		      if (path[Actual_Cop].size () > 1) {
-			         
-                #ifdef DEBUG
-                std::cout << Actual_Cop << ". cop is routing to the nearest sector to catch GANGSTERS!\nThe sector is "<< Cop_Nearest_Sector[Actual_Cop] << std::endl;
-                #endif
-				      route (socket, *it, path[Actual_Cop]);
-				
-		      }
-		
-	      //Boss Cop mit csinál?! Megy a legközelebbi gengszterre, mindig elsőbsége van.
-	      } else if(BCOPR[Actual_Cop] == 0 || GP[Actual_Cop] > MGP/2) {
-		
-			    gngstrs[Actual_Cop] = gangsters (socket, *it, to,&MG);
-			    for (int i = 0; i < (int)gngstrs[Actual_Cop].size(); i++) {
-			      
-  				  if (CanIRoute(Cop_route_ID,Actual_Cop,gngstrs[Actual_Cop][i].to,Initialized_Cops,from)) {				    
-  					  path[Actual_Cop] = hasDijkstraPath ( to, gngstrs[Actual_Cop][i].to );
-  					  Cop_route_ID[Actual_Cop] = gngstrs[Actual_Cop][i].to;
-  					  //std::cout << Actual_Cop << " is routing to: "<< Cop_route_ID[Actual_Cop] << " in the ELSE." << std::endl;
-  					  break;				  
-  				  }					
-			    }
-		 
-		  if (path[Actual_Cop].size () > 1) {
-		    
-			    route (socket, *it, path[Actual_Cop]);
-		  }
-		  //std::cout << Actual_Cop << " - ELSE AGBA ESTEM BELE!!"<< std::endl;
-	    } else {
-    
-          gngstrs[Actual_Cop] = gangsters (socket, *it, to,&MG);
-          
-          for (int i = 0; i < (int)gngstrs[Actual_Cop].size(); i++) {
-            
-            if (CanIRoute(Cop_route_ID,Actual_Cop,gngstrs[Actual_Cop][i].to,Initialized_Cops,from)) {           
-              path[Actual_Cop] = hasDijkstraPath ( to, gngstrs[Actual_Cop][i].to );
-              Cop_route_ID[Actual_Cop] = gngstrs[Actual_Cop][i].to;
-              //std::cout << Actual_Cop << " is routing to: "<< Cop_route_ID[Actual_Cop] << " in the ELSE." << std::endl;
-              break;          
-            }         
-          }
-     
-        if (path[Actual_Cop].size () > 1) {
-          
-            route (socket, *it, path[Actual_Cop]);
-        }
-      //std::cout << Actual_Cop << " - ELSE AGBA ESTEM BELE!!"<< std::endl;
-      }
-	  #ifdef DEBUG
-	  std::cout << Actual_Cop <<  ". cop is routing to " << Cop_route_ID[Actual_Cop] << " Mode: "<< BCOPR[Actual_Cop] << std::endl;
-	  #endif
-	  } else {
-	    std::cout << "Warning there is no gangster available!" << std::endl;
-	  }
-	  Actual_Cop++;
-	}
+    	  #ifdef DEBUG
+    	  std::cout << Actual_Cop <<  ". cop is routing to " << Cop_route_ID[Actual_Cop] << " Mode: "<< BCOPR[Actual_Cop] << std::endl;
+    	  #endif
+    	  } else {
+    	    std::cout << "Warning there is no gangster available!" << std::endl;
+    	  }
+    	  Actual_Cop++;
+    	}
     }
 }
 
